@@ -26,13 +26,38 @@ makeCacheMatrix <- function(x = matrix()) {
 cacheSolve <- function(x, ...) {
         ## Return a matrix that is the inverse of 'x'
   
+  ## attempt to get the inverse of the matrix stored in cache
   inv <- x$getinverse()
+  
+  # return inverted matrix from cache if it exists
+  # else create the matrix in working environment
   if(!is.null(inv)) {
     message("getting cached data")
     return(inv)
   }
+  
+  # create matrix since it does not exist
   data <- x$get()
-  inv <- solve(data, ...)
-  x$setinverse(inv)
+  # make sure matrix is square and invertible
+  # if not, handle exception cleanly
+  tryCatch({
+    inv <- solve(data, ...)
+  },
+  error = function(e) {
+    message("Error:")
+    message(e)
+    
+    return(NA)
+  },
+  warning = function(e) {
+    message("Warning:")
+    message(e)
+    
+    return(NA)
+  },
+  finally = {
+    # set inverted matrix in cache
+    x$setinverse(inv)
+  } )
   inv
 }
